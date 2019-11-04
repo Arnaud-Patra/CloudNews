@@ -1,0 +1,39 @@
+.body {
+    background-color: #030303;
+}
+
+.submissionList {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #000000;
+    background-color: #030303;
+    border-radius : 10px;
+}
+
+.submissionItem {
+    margin: 10px;
+    padding: 10px;
+    border: 3px solid #bbb;
+    background-color: #1A1A1B;
+    border-radius : 15px;
+    font-family: Arial, sans-serif;
+    color: #D7DADC;
+}
+.subreddit{
+    font-weight: bold;
+}
+.sub_title {
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+    font-size: 18px;
+    padding: 10px 0px 10px 0px;
+    color: #D7DADC;
+}
+
+.score{
+    color: #dc8033;
+}
+
+.upvote{
+
+}
