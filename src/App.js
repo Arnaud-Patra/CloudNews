@@ -12,18 +12,8 @@ class App extends React.Component {
         this.state = {
             subs: []
         };
-
+        //Setting subs as a array of SubModels would be nicer.
     }
-
-    //Mock data
-    /*
-    subs = [
-        { id: 1, title: "Leanne Graham", url: "www.google.com",upvote: 11 },
-        { id: 2, title: "Ervin Howell", url: "a great title",upvote: 12 },
-        { id: 3, title: "Clementine Bauch", url: "a great title",upvote: 13 },
-        { id: 4,  title: "Patricia Lebsack", url: "a great title",upvote: 14 }
-    ];
-    */
 
     componentDidMount() {
         /*
@@ -38,29 +28,30 @@ class App extends React.Component {
 
         Object.entries(reddit_news).map(([redditNewsKey, value]) => {
 
-            const url = parse_url(value, "top", 2);
+            const url = parse_url(value, "top", 5);
 
             console.log("fetching : " + url);
 
             //call API to retrieve posts
             this.postsFetcher(url);
 
-            //Sort the subs and modify state after.
-            sort_subs(this.subs);
 
 
         });
+    }
 
-        for (let redditNewsKey in reddit_news) {
-            console.log(redditNewsKey);
+    componentDidUpdate() {
 
-        }
+        console.log("updated!");
+        //todo : Little problem here, update each time we have a fetch.
+        calc_pop(this.state.subs);
 
-
+        //Sort the subs and modify state after.
+        sort_subs(this.state.subs);
 
     }
 
-     postsFetcher(url) {
+    postsFetcher(url) {
         fetch(url)
             .then(res => res.json())
             .then(
@@ -126,10 +117,9 @@ function parseResponse(result) {
  * return << 1
  * **/
 function calc_pop(subs) {
-
-    for(const sub in subs){
-
-    }
+    subs.forEach(function(sub) {
+        sub.popularity = sub.score / sub.subreddit_subscribers
+    });
     //return ups/subscribers
 }
 
