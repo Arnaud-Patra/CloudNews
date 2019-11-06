@@ -18,6 +18,9 @@ function SubmissionItem(props){
             <div className="score">
                 {props.score}
             </div>
+            <div className="pop">
+                {props.popularity}
+            </div>
         </div>
 
     )
@@ -27,7 +30,7 @@ function SubmissionList(props) {
     return(
         <div className="submissionList">
             {
-                props.data.map(c => <SubmissionItem key={c.id} subreddit={c.subreddit} title={c.title} url={c.url} score={c.score}/>)
+                props.data.map(c => <SubmissionItem key={c.id} subreddit={c.subreddit} title={c.title} url={c.url} score={c.score} popularity={c.popularity}/>)
             }
         </div>
     )

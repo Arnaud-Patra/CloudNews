@@ -9,23 +9,22 @@ class App extends React.Component {
         // Required step: always call the parent class' constructor
         super(props);
 
+        this.postsFetcher = this.postsFetcher.bind(this);
+
         this.state = {
             subs: []
         };
         //Setting subs as a array of SubModels would be nicer.
     }
 
-    componentDidMount() {
-        /*
-        const sub = new SubModel("www.google.com", "Leanne Graham", 11);
-        this.setState({subs: [sub]});
-        */
-        //this.state.subs.push(sub);
-        /*
-        const subs_fetched = this.postsfetcher();
-        this.setState({subs: subs_fetched});
-        */
+    onClearsubs = () => {
+        this.setState({ subs: [] });
+    };
 
+
+    componentDidMount() {
+
+        //fetch urls from reddit_news
         Object.entries(reddit_news).map(([redditNewsKey, value]) => {
 
             const url = parse_url(value, "top", 5);
@@ -34,24 +33,34 @@ class App extends React.Component {
 
             //call API to retrieve posts
             this.postsFetcher(url);
-
-
-
         });
-    }
 
-    componentDidUpdate() {
 
         console.log("updated!");
         //todo : Little problem here, update each time we have a fetch.
         calc_pop(this.state.subs);
 
+        for (let i = 0; i < this.state.subs.length; i++) {
+            console.log(this.state.subs[i].popularity)
+        }
+
         //Sort the subs and modify state after.
-        sort_subs(this.state.subs);
+        const new_subs = sort_subs(this.state.subs);
 
         for (let i = 0; i < this.state.subs.length; i++) {
             console.log(this.state.subs[i].popularity)
         }
+
+        //Todo : view does not take change into account.
+        this.setState({subs: new_subs})
+
+    }
+
+    componentDidUpdate() {
+
+
+
+
     }
 
     postsFetcher(url) {
@@ -65,15 +74,17 @@ class App extends React.Component {
                         new_subs.push(SubModel.toSubModel(item))
                     }
 
-                    // TODO : not set state here but add ubs to larger list.
+                    // TODO : not set state here but add ubs to larger list?
                     //Add new subs to previous one in the state
-                    this.setState(prevState => ({
-                        subs: [...prevState.subs.concat(new_subs)]
-                    }))
-
-                    //TODO : call functions to sort the sub here?
-
-                    // this.setState({subs: new_subs})
+                    // this.setState(prevState => ({
+                    //     subs: [...prevState.subs.concat(new_subs)]
+                    // }))
+                    this.setState(prevState => {
+                        const subs = [...prevState.subs.concat(new_subs)];
+                        return {
+                            subs,
+                        };
+                    });
                 },
                 // Error handler
                 (error) => {
@@ -84,12 +95,15 @@ class App extends React.Component {
             )
     }
 
+
+
     render() {
         return(
             <div className="body">
                 <div className="mainHeader">
                     Best website ever
                 </div>
+                <button type="button"  onClick={this.onClearsubs} />
                 <SubmissionList data={this.state.subs}/>
             </div>
 
@@ -131,23 +145,26 @@ function calc_pop(subs) {
  * Bubble sort
  * **/
 function sort_subs(subs) {
+    const new_subs = subs;
 
-    const len = subs.length;
+    const len = new_subs.length;
+
     for (let i = 0; i < len; i++) {
         for (let j = 0; j < len; j++) {
 
-            if(subs[j].popularity < subs[i].popularity){
-                const tmp_sub =  subs[i];
-                subs[i] = subs[j];
-                subs[j] = tmp_sub;
+            if(new_subs[j].popularity < new_subs[i].popularity){
+                const tmp_sub =  new_subs[i];
+                new_subs[i] = new_subs[j];
+                new_subs[j] = tmp_sub;
             }
         }
     }
-
+    subs.push(new SubModel("test","test", "test", "test", 3, 3))
     //Todo: remove
-    for (let i = 0; i < len; i++) {
-        console.log("in sort : " + subs[i].popularity)
-    }
+    // for (let i = 0; i < len; i++) {
+    //     console.log("after sort : " + subs[i].popularity)
+    // }
+    return new_subs
 }
 
 export default App;
