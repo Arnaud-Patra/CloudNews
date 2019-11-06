@@ -49,6 +49,9 @@ class App extends React.Component {
         //Sort the subs and modify state after.
         sort_subs(this.state.subs);
 
+        for (let i = 0; i < this.state.subs.length; i++) {
+            console.log(this.state.subs[i].popularity)
+        }
     }
 
     postsFetcher(url) {
@@ -113,24 +116,38 @@ function parseResponse(result) {
     return subs
 }
 
-/**compute popularity of all submissions from their subscribers of subreddit and upvotes.
- * return << 1
+/**
+ * Compute popularity of all submissions from their subscribers of subreddit and upvotes.
+ * void return
  * **/
 function calc_pop(subs) {
     subs.forEach(function(sub) {
         sub.popularity = sub.score / sub.subreddit_subscribers
     });
-    //return ups/subscribers
 }
 
 /**
- * Function to sort the submissions by their score. 
+ * Function to sort the submissions by their popularity.
+ * Bubble sort
  * **/
 function sort_subs(subs) {
-    //Todo : implement sorting algorithm
-    const sorted_subs = null;
 
-    return sorted_subs
+    const len = subs.length;
+    for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len; j++) {
+
+            if(subs[j].popularity < subs[i].popularity){
+                const tmp_sub =  subs[i];
+                subs[i] = subs[j];
+                subs[j] = tmp_sub;
+            }
+        }
+    }
+
+    //Todo: remove
+    for (let i = 0; i < len; i++) {
+        console.log("in sort : " + subs[i].popularity)
+    }
 }
 
 export default App;
