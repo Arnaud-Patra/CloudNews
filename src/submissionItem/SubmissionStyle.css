@@ -3,7 +3,7 @@
 }
 
 .submissionList {
-    margin: 10px;
+    margin: 10px 10px 10px 100px;
     padding: 10px;
     border: 1px solid #000000;
     background-color: #030303;
@@ -11,12 +11,14 @@
 }
 
 .submissionItem {
+    width: 700px;
     margin: 10px;
-    padding: 10px;
-    border: 3px solid #bbb;
+    padding: 10px 10px 10px 10px;
+    border: 2px solid #282c34;
     background-color: #1A1A1B;
-    border-radius : 15px;
+    border-radius : 13px;
     font-family: Arial, sans-serif;
+    font-size: 13px;
     color: #D7DADC;
 }
 .subreddit{
@@ -25,13 +27,17 @@
 .sub_title {
     font-family: Arial, sans-serif;
     font-weight: normal;
-    font-size: 18px;
+    font-size: 15px;
     padding: 10px 0px 10px 0px;
     color: #D7DADC;
 }
 
 .score{
     color: #dc8033;
+}
+
+.url{
+    color: #4FBCFF;
 }
 
 .upvote{

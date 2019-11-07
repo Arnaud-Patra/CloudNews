@@ -32,11 +32,10 @@ class App extends React.Component {
             console.log("fetching : " + url);
 
             //call API to retrieve posts
-            this.postsFetcher(url);
+            this.postsFetcher(url); //todo : use Promises with multiple urls? ?
         });
 
 
-        console.log("updated!");
         //todo : Little problem here, update each time we have a fetch.
         calc_pop(this.state.subs);
 
@@ -45,21 +44,19 @@ class App extends React.Component {
         }
 
         //Sort the subs and modify state after.
-        const new_subs = sort_subs(this.state.subs);
+        sort_subs(this.state.subs);
 
         for (let i = 0; i < this.state.subs.length; i++) {
             console.log(this.state.subs[i].popularity)
         }
 
         //Todo : view does not take change into account.
-        this.setState({subs: new_subs})
+        //this.setState({subs: new_subs})
 
     }
 
+
     componentDidUpdate() {
-
-
-
 
     }
 
@@ -160,11 +157,6 @@ function sort_subs(subs) {
         }
     }
     subs.push(new SubModel("test","test", "test", "test", 3, 3))
-    //Todo: remove
-    // for (let i = 0; i < len; i++) {
-    //     console.log("after sort : " + subs[i].popularity)
-    // }
-    return new_subs
 }
 
 export default App;
