@@ -5,14 +5,19 @@ import SubModel from "./Models/submodel";
 import {reddit_news} from "./enum/urls";
 
 class App extends React.Component {
+
+
     constructor(props) {
         // Required step: always call the parent class' constructor
         super(props);
 
+        const NO_DATA = new SubModel("","", "No data to show", "", 3, 3);
+
+
         this.postsFetcher = this.postsFetcher.bind(this);
 
         this.state = {
-            subs: []
+            subs: [NO_DATA]
         };
         //Setting subs as a array of SubModels would be nicer.
     }
@@ -22,18 +27,69 @@ class App extends React.Component {
     };
 
 
-    componentDidMount() {
+    async componentDidMount() {
 
-        //fetch urls from reddit_news
-        Object.entries(reddit_news).map(([redditNewsKey, value]) => {
+
+        /** fetch urls from reddit_news **/
+        /*
+        Object.entries(reddit_news).map(async ([redditNewsKey, value]) => {
 
             const url = parse_url(value, "top", 5);
 
             console.log("fetching : " + url);
 
             //call API to retrieve posts
-            this.postsFetcher(url); //todo : use Promises with multiple urls? ?
+            const response = this.postsFetcher(url); //call fetcher
+            console.log(response);
+
+            subs.concat(response) //Add subs to array
         });
+        */
+
+        //todo : use enum an maping instead of this
+        const response1 = fetch('https://www.reddit.com/r/worldnews/top.json?limit=2');
+        const response2 = fetch('https://www.reddit.com/r/news/top.json?limit=2');
+
+
+
+        //todo : setstate here?
+        /** Process array of Promises**/
+        Promise.all([response1, response2])
+            .then(files =>{
+                files.forEach(file=>{
+                    process(file.json());
+                })
+            })
+            .catch();
+
+        /** Process one Promises and send to parse **/
+        const process = (prom) =>{
+            prom.then(data =>{
+                console.log(data);
+
+                const subs = parseResponse(data);
+
+                this.setState((prevState) => ({
+                    subs : [...prevState.subs.concat(subs)]
+                }));
+
+            });
+
+            //this.setState({subs: subs});
+        };
+
+
+
+        /** update state (concatenate)**/
+        // this.setState(prevState => {
+        //     const subs = [...prevState.subs.concat(new_subs)];
+        //     return {
+        //         subs,
+        //     };
+        // });
+
+        // const response = await fetch(`https://www.reddit.com/r/worldnews/top.json?count=2`);
+        // const json = await response.json();
 
 
         //todo : Little problem here, update each time we have a fetch.
@@ -56,32 +112,22 @@ class App extends React.Component {
     }
 
 
-    componentDidUpdate() {
-
-    }
-
-    postsFetcher(url) {
+    async postsFetcher(url) {
         fetch(url)
             .then(res => res.json())
             .then(
                 (result) => {
-                    const new_subs = [];
-                    //Should return list of models.
-                    for (const item of result.data.children){
-                        new_subs.push(SubModel.toSubModel(item))
-                    }
 
-                    // TODO : not set state here but add ubs to larger list?
-                    //Add new subs to previous one in the state
-                    // this.setState(prevState => ({
-                    //     subs: [...prevState.subs.concat(new_subs)]
-                    // }))
-                    this.setState(prevState => {
-                        const subs = [...prevState.subs.concat(new_subs)];
-                        return {
-                            subs,
-                        };
-                    });
+                    //todo : do that after we have all the data?
+
+                    // const new_subs = [];
+                    // //Should return list of models.
+                    // for (const item of result.data.children){
+                    //     new_subs.push(SubModel.toSubModel(item))
+                    // }
+                    // return new_subs;
+                    return result
+
                 },
                 // Error handler
                 (error) => {
@@ -113,18 +159,20 @@ class App extends React.Component {
  * nb_subs : int
  * **/
 function parse_url(url, mode = "top", nb_subs = 10){
-    // "https://www.reddit.com/r/worldnews/top.json?count=1";
+    // should be the format : "https://www.reddit.com/r/worldnews/top.json?limit=1";
     return url + mode + ".json?limit=" + nb_subs
 }
 
 /** Function to parse the response**/
 function parseResponse(result) {
-    const subs = [];
+
+    const subs_to_push = [];
+
     //Should return list of models.
     for (const item of result.data.children){
-        subs.push(SubModel.toSubModel(item))
+        subs_to_push.push(SubModel.toSubModel(item))
     }
-    return subs
+    return subs_to_push
 }
 
 /**
