@@ -11,13 +11,15 @@ class App extends React.Component {
         // Required step: always call the parent class' constructor
         super(props);
 
-        const NO_DATA = new SubModel("","", "No data to show", "", 3, 3);
+        const NO_DATA = new SubModel("","", "No data to show", 0, 1, 0);
+        const Data_test = new SubModel("","", "Test0", 0, 1, 1);
+        const Data_test_10 = new SubModel("","", "Test10", 0, 1, 10);
 
 
         this.postsFetcher = this.postsFetcher.bind(this);
 
         this.state = {
-            subs: [NO_DATA]
+            subs: [NO_DATA, Data_test_10, Data_test]
         };
         //Setting subs as a array of SubModels would be nicer.
     }
@@ -50,64 +52,46 @@ class App extends React.Component {
         const response1 = fetch('https://www.reddit.com/r/worldnews/top.json?limit=2');
         const response2 = fetch('https://www.reddit.com/r/news/top.json?limit=2');
 
-
-
         //todo : setstate here?
-        /** Process array of Promises**/
+        /** Process array of Promises into one **/
         Promise.all([response1, response2])
-            .then(files =>{
-                files.forEach(file=>{
-                    process(file.json());
-                })
+            .then(responses =>{
+                responses.forEach(response=>{
+                    process(response.json());
+                });
+                return "hello"
             })
-            .catch();
+            .then(a =>(
+                    console.log("coucou, a=" + a)
 
-        /** Process one Promises and send to parse **/
-        const process = (prom) =>{
+                )
+            )
+        ;
+
+        /** Process one Promises **/
+        const process = async (prom) =>{
             prom.then(data =>{
-                console.log(data);
 
-                const subs = parseResponse(data);
+                //Response to SubModel
+                const parsed_subs = parseResponseToModel(data);
 
+                //calc popularity todo : not use this.state.subs but local var
+                calc_pop(parsed_subs);
+
+                /** update state (concatenate)**/
                 this.setState((prevState) => ({
-                    subs : [...prevState.subs.concat(subs)]
+                    subs : [...prevState.subs.concat(parsed_subs)]
                 }));
-
             });
-
-            //this.setState({subs: subs});
         };
 
-
-
-        /** update state (concatenate)**/
-        // this.setState(prevState => {
-        //     const subs = [...prevState.subs.concat(new_subs)];
-        //     return {
-        //         subs,
-        //     };
+        /** Process parsing when p resolved **/
+        // let p  = await Promise.all([response1, response2]);
+        // p.forEach(response=>{
+        //     process(response.json());
+        //     const sorted_subs = sort_subs(this.state.subs);
+        //     this.setState({subs:sorted_subs})
         // });
-
-        // const response = await fetch(`https://www.reddit.com/r/worldnews/top.json?count=2`);
-        // const json = await response.json();
-
-
-        //todo : Little problem here, update each time we have a fetch.
-        calc_pop(this.state.subs);
-
-        for (let i = 0; i < this.state.subs.length; i++) {
-            console.log(this.state.subs[i].popularity)
-        }
-
-        //Sort the subs and modify state after.
-        sort_subs(this.state.subs);
-
-        for (let i = 0; i < this.state.subs.length; i++) {
-            console.log(this.state.subs[i].popularity)
-        }
-
-        //Todo : view does not take change into account.
-        //this.setState({subs: new_subs})
 
     }
 
@@ -164,7 +148,7 @@ function parse_url(url, mode = "top", nb_subs = 10){
 }
 
 /** Function to parse the response**/
-function parseResponse(result) {
+function parseResponseToModel(result) {
 
     const subs_to_push = [];
 
@@ -181,7 +165,7 @@ function parseResponse(result) {
  * **/
 function calc_pop(subs) {
     subs.forEach(function(sub) {
-        sub.popularity = sub.score / sub.subreddit_subscribers
+        sub.popularity = 1000 * sub.score / sub.subreddit_subscribers
     });
 }
 
@@ -204,7 +188,7 @@ function sort_subs(subs) {
             }
         }
     }
-    subs.push(new SubModel("test","test", "test", "test", 3, 3))
+    return new_subs;
 }
 
 export default App;

@@ -19,7 +19,7 @@ function SubmissionItem(props){
                 {props.score}
             </div>
             <div className="pop">
-                {props.popularity}
+                {"pop = " + props.popularity}
             </div>
         </div>
 
