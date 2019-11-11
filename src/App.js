@@ -30,8 +30,6 @@ class App extends React.Component {
 
 
     async componentDidMount() {
-
-
         /** fetch urls from reddit_news **/
         /*
         Object.entries(reddit_news).map(async ([redditNewsKey, value]) => {
@@ -49,50 +47,60 @@ class App extends React.Component {
         */
 
         //todo : use enum an maping instead of this
-        const response1 = fetch('https://www.reddit.com/r/worldnews/top.json?limit=2');
-        const response2 = fetch('https://www.reddit.com/r/news/top.json?limit=2');
+        const response1 = this.postsFetcher('https://www.reddit.com/r/worldnews/top.json?limit=2');
+        const response2 = this.postsFetcher('https://www.reddit.com/r/news/top.json?limit=2');
 
         //todo : setstate here?
         /** Process array of Promises into one **/
         Promise.all([response1, response2])
             .then(responses =>{
                 responses.forEach(response=>{
-                    process(response.json());
-                });
-                return "hello"
-            })
-            .then(a =>(
+                    let tmp;
+                    tmp = process(response.json());
+                    return tmp
+                }).then(a =>{
                     console.log("coucou, a=" + a)
-
-                )
-            )
-        ;
+                });
+            })
+            .catch(error => console.log(`Error in executing ${error}`));
 
         /** Process one Promises **/
-        const process = async (prom) =>{
-            prom.then(data =>{
+        const process = (response_json) =>{
+            response_json.then(data =>{
 
                 //Response to SubModel
                 const parsed_subs = parseResponseToModel(data);
 
                 //calc popularity todo : not use this.state.subs but local var
-                calc_pop(parsed_subs);
+                calc_pop(data);
+
+                return data;
 
                 /** update state (concatenate)**/
-                this.setState((prevState) => ({
-                    subs : [...prevState.subs.concat(parsed_subs)]
-                }));
+                // this.setState((prevState) => ({
+                //     subs : [...prevState.subs.concat(parsed_subs)]
+                // }));
             });
         };
 
-        /** Process parsing when p resolved **/
+        //Other method
         // let p  = await Promise.all([response1, response2]);
-        // p.forEach(response=>{
-        //     process(response.json());
-        //     const sorted_subs = sort_subs(this.state.subs);
-        //     this.setState({subs:sorted_subs})
-        // });
+        /** Process parsing when p resolved **/
+        // this.process_responses(p)
+        //     .then(subs =>{
+        //         const sorted_subs = sort_subs(subs);
+        //         this.setState({subs:sorted_subs})
+        //     });
+    }
 
+    async process_responses(p) {
+        let subs_to_sort = [];
+        for (const response of p) {
+            response.json().then(data =>{
+                subs_to_sort = process_response(data);
+            });
+        }
+        return subs_to_sort
     }
 
 
@@ -101,17 +109,9 @@ class App extends React.Component {
             .then(res => res.json())
             .then(
                 (result) => {
-
-                    //todo : do that after we have all the data?
-
-                    // const new_subs = [];
-                    // //Should return list of models.
-                    // for (const item of result.data.children){
-                    //     new_subs.push(SubModel.toSubModel(item))
-                    // }
-                    // return new_subs;
-                    return result
-
+                    // const new_subs = parseResponseToModel(result.data.children);
+                    console.log("posts " + url + "loaded !");
+                    return result;
                 },
                 // Error handler
                 (error) => {
@@ -147,7 +147,22 @@ function parse_url(url, mode = "top", nb_subs = 10){
     return url + mode + ".json?limit=" + nb_subs
 }
 
-/** Function to parse the response**/
+function process_response(data) {
+    console.log("response_data = " + data);
+
+    //Response to SubModel
+    const parsed_subs = parseResponseToModel(data);
+
+    //calc popularity todo : not use this.state.subs but local var
+    calc_pop(parsed_subs);
+
+    return parsed_subs;
+}
+
+
+/** Function to parse the response
+ * return : list of models*
+ * **/
 function parseResponseToModel(result) {
 
     const subs_to_push = [];
