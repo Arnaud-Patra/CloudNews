@@ -1,12 +1,9 @@
 .body {
-    background-color: #030303;
 }
 
 .submissionList {
     margin: 10px 10px 10px 100px;
     padding: 10px;
-    border: 1px solid #000000;
-    background-color: #030303;
     border-radius : 10px;
 }
 
@@ -14,13 +11,20 @@
     width: 700px;
     margin: 10px;
     padding: 10px 10px 10px 10px;
-    border: 2px solid #282c34;
+    border: 2px solid #3a3f4b;
     background-color: #1A1A1B;
     border-radius : 13px;
     font-family: Arial, sans-serif;
     font-size: 13px;
     color: #D7DADC;
 }
+
+.submissionItem:hover {
+    background-color: rgba(10, 169, 255, 0.39);
+    border: 2px solid #8191a7;
+
+}
+
 .subreddit{
     font-weight: bold;
 }
@@ -33,6 +37,9 @@
 }
 
 .score{
+    position: relative;
+    padding: 10px 0px 10px 0px;
+    font-weight: bold;
     color: #dc8033;
 }
 
@@ -40,6 +47,7 @@
     color: #4FBCFF;
 }
 
-.upvote{
 
+.pop{
+    color: #282c34;
 }
