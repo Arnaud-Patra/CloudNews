@@ -46,63 +46,63 @@ class App extends React.Component {
         });
         */
 
-        //todo : use enum an maping instead of this
-        const response1 = this.postsFetcher('https://www.reddit.com/r/worldnews/top.json?limit=2');
-        const response2 = this.postsFetcher('https://www.reddit.com/r/news/top.json?limit=2');
+        const promise_worldnews = fetch('https://www.reddit.com/r/worldnews/top.json?limit=3')
+            .then(res => res.json());
+        const promise_news = fetch('https://www.reddit.com/r/news/top.json?limit=3')
+            .then(res => res.json());
 
-        //todo : setstate here?
-        /** Process array of Promises into one **/
-        Promise.all([response1, response2])
-            .then(responses =>{
-                responses.forEach(response=>{
-                    let tmp;
-                    tmp = process(response.json());
-                    return tmp
-                }).then(a =>{
-                    console.log("coucou, a=" + a)
-                });
+        Promise.all([promise_news, promise_worldnews])
+            .then(responses => {
+                    console.log("responses : "); //called when values arrive
+                    console.log(responses); //called when values arrive
+                    responses.map(response =>{
+                        process(response)
+                    });
+
+                    console.log("state = " + this.state.subs); //called when values arrive
+                })
+            .then( () =>{
+                console.log("proceed to sort.");
+                const sorted_subs = sort_subs(this.state.subs);
+                this.setState({subs: sorted_subs})
             })
             .catch(error => console.log(`Error in executing ${error}`));
 
-        /** Process one Promises **/
-        const process = (response_json) =>{
-            response_json.then(data =>{
+        /** Process one Promise **/
+        const process = (response) =>{
+            console.log("starting process, data = ");
+            console.log(response);
+            //Response to SubModel
+            let new_subs = parseResponseToModel(response);
 
-                //Response to SubModel
-                const parsed_subs = parseResponseToModel(data);
+            //calc popularity todo : not use this.state.subs but local var
+            calc_pop(new_subs);
 
-                //calc popularity todo : not use this.state.subs but local var
-                calc_pop(data);
-
-                return data;
-
-                /** update state (concatenate)**/
-                // this.setState((prevState) => ({
-                //     subs : [...prevState.subs.concat(parsed_subs)]
-                // }));
-            });
+            /** update state (concatenate)**/
+            this.setState((prevState) => ({
+                subs : [...prevState.subs.concat(new_subs)]
+            }));
         };
 
-        //Other method
-        // let p  = await Promise.all([response1, response2]);
-        /** Process parsing when p resolved **/
-        // this.process_responses(p)
-        //     .then(subs =>{
-        //         const sorted_subs = sort_subs(subs);
-        //         this.setState({subs:sorted_subs})
-        //     });
-    }
+        // //todo : use enum an maping instead of this
+        // const response1 = this.postsFetcher('https://www.reddit.com/r/worldnews/top.json?limit=2');
+        // const response2 = this.postsFetcher('https://www.reddit.com/r/news/top.json?limit=2');
+        //
+        // //todo : setstate here?
+        // /** Process array of Promises into one **/
+        // Promise.all([response1, response2])
+        //     .then(responses =>{
+        //         responses.forEach(response=>{
+        //             let tmp;
+        //             tmp = process(response);
+        //             return tmp
+        //         }).then(a =>{
+        //             console.log("coucou, a=" + a)
+        //         });
+        //     })
+        //     .catch(error => console.log(`Error in executing ${error}`));
 
-    async process_responses(p) {
-        let subs_to_sort = [];
-        for (const response of p) {
-            response.json().then(data =>{
-                subs_to_sort = process_response(data);
-            });
-        }
-        return subs_to_sort
     }
-
 
     async postsFetcher(url) {
         fetch(url)
@@ -110,19 +110,17 @@ class App extends React.Component {
             .then(
                 (result) => {
                     // const new_subs = parseResponseToModel(result.data.children);
-                    console.log("posts " + url + "loaded !");
+                    // console.log("posts " + url + " loaded !");
                     return result;
                 },
                 // Error handler
                 (error) => {
-                    console.log("could not connect to : " + url);
-                    //TODO : error handling
+                    console.log("error : " + error);
+                    //todo : error handling
                     return null
                 }
             )
     }
-
-
 
     render() {
         return(
@@ -133,7 +131,6 @@ class App extends React.Component {
                 <button type="button"  onClick={this.onClearsubs} />
                 <SubmissionList data={this.state.subs}/>
             </div>
-
         )
     }
 }
@@ -141,24 +138,12 @@ class App extends React.Component {
 /** Function to parse the url
  * mode : string -> should be enum
  * nb_subs : int
+ * return : full url as string
  * **/
 function parse_url(url, mode = "top", nb_subs = 10){
     // should be the format : "https://www.reddit.com/r/worldnews/top.json?limit=1";
     return url + mode + ".json?limit=" + nb_subs
 }
-
-function process_response(data) {
-    console.log("response_data = " + data);
-
-    //Response to SubModel
-    const parsed_subs = parseResponseToModel(data);
-
-    //calc popularity todo : not use this.state.subs but local var
-    calc_pop(parsed_subs);
-
-    return parsed_subs;
-}
-
 
 /** Function to parse the response
  * return : list of models*
