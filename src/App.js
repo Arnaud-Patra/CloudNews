@@ -12,9 +12,11 @@ class App extends React.Component {
 
         const NO_DATA = new SubModel("","", "No data to show", 0, 1, 0);
 
+        // this.onNews = this.onNews.bind(this);
+
         this.state = {
             subs: [],
-            section : sections.NEWS
+            section : sections.TECH
         };
         //Setting subs as a array of SubModels would be nicer.
     }
@@ -23,12 +25,20 @@ class App extends React.Component {
         this.setState({ subs: [] });
     };
 
+    onNews = () => {
+        this.setState({ section: sections.NEWS });
+        console.log(this.state.section);
+    };
+
+    onTech = () => {
+        this.setState({ section: sections.TECH });
+    };
 
     async componentDidMount() {
 
         let promises = [];
         /** fetch urls from reddit_news **/
-        Object.entries(reddit_news).map(async ([redditNewsKey, value]) => {
+        Object.entries(this.state.section).map(async ([redditNewsKey, value]) => {
 
             const url = parse_url(value, "top", 5);
 
@@ -90,13 +100,15 @@ class App extends React.Component {
                 <div className="mainHeader">
                     Best website ever
                 </div>
-                <button type="button"  onClick={this.onClearsubs}>
-                    news
-                </button>
-                <button type="button"  onClick={this.onClearsubs}>
-                    Tech
-                </button>
-                <SubmissionList data={this.state.subs}/>
+                <div className="buttonList">
+                    <button className="button" onClick={this.onNews}>
+                        news
+                    </button>
+                    <button className="button" onClick={this.onTech}>
+                        Tech
+                    </button>
+                </div>
+                <SubmissionList className="submissionList" data={this.state.subs}/>
             </div>
         )
     }
@@ -156,6 +168,7 @@ function sort_subs(subs) {
     }
     return new_subs;
 }
+
 
 export default App;
 
