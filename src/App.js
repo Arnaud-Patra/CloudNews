@@ -2,22 +2,19 @@ import React from 'react';
 import './App.css';
 import SubmissionList from './submissionItem/Submission'
 import SubModel from "./Models/submodel";
-import {reddit_news} from "./enum/urls";
+import {reddit_news, sections} from "./enum/urls";
 
 class App extends React.Component {
-
 
     constructor(props) {
         // Required step: always call the parent class' constructor
         super(props);
 
-        const NO_DATA = new SubModel("","", "No data to show", "", 3, 3);
-
-
-        this.postsFetcher = this.postsFetcher.bind(this);
+        const NO_DATA = new SubModel("","", "No data to show", 0, 1, 0);
 
         this.state = {
-            subs: [NO_DATA]
+            subs: [],
+            section : sections.NEWS
         };
         //Setting subs as a array of SubModels would be nicer.
     }
@@ -29,116 +26,63 @@ class App extends React.Component {
 
     async componentDidMount() {
 
-
+        let promises = [];
         /** fetch urls from reddit_news **/
-        /*
         Object.entries(reddit_news).map(async ([redditNewsKey, value]) => {
 
             const url = parse_url(value, "top", 5);
 
             console.log("fetching : " + url);
+            const promise = fetch(url)
+                .then(res => res.json());
 
-            //call API to retrieve posts
-            const response = this.postsFetcher(url); //call fetcher
-            console.log(response);
-
-            subs.concat(response) //Add subs to array
+            promises.push(promise)
         });
-        */
 
-        //todo : use enum an maping instead of this
-        const response1 = fetch('https://www.reddit.com/r/worldnews/top.json?limit=2');
-        const response2 = fetch('https://www.reddit.com/r/news/top.json?limit=2');
-
-
-
-        //todo : setstate here?
-        /** Process array of Promises**/
-        Promise.all([response1, response2])
-            .then(files =>{
-                files.forEach(file=>{
-                    process(file.json());
-                })
+        /** precess list of promises **/
+        Promise.all(promises)
+            .then(responses => {
+                responses.map(response =>{
+                    process(response)
+                });
             })
-            .catch();
+            .then( () =>{
+                console.log("proceed to sort.");
+                const sorted_subs = sort_subs(this.state.subs);
+                this.setState({subs: sorted_subs})
+            })
+            .catch(error => console.log(`Error in executing ${error}`));
 
-        /** Process one Promises and send to parse **/
-        const process = (prom) =>{
-            prom.then(data =>{
-                console.log(data);
+        /** Process one Promise **/
+        const process = (response) =>{
+            //Response to SubModel
+            let new_subs = parseResponseToModel(response);
 
-                const subs = parseResponse(data);
+            //calc popularity todo : not use this.state.subs but local var
+            calc_pop(new_subs);
 
-                this.setState((prevState) => ({
-                    subs : [...prevState.subs.concat(subs)]
-                }));
-
-            });
-
-            //this.setState({subs: subs});
+            /** update state (concatenate)**/
+            this.setState((prevState) => ({
+                subs : [...prevState.subs.concat(new_subs)]
+            }));
         };
 
-
-
-        /** update state (concatenate)**/
-        // this.setState(prevState => {
-        //     const subs = [...prevState.subs.concat(new_subs)];
-        //     return {
-        //         subs,
-        //     };
-        // });
-
-        // const response = await fetch(`https://www.reddit.com/r/worldnews/top.json?count=2`);
-        // const json = await response.json();
-
-
-        //todo : Little problem here, update each time we have a fetch.
-        calc_pop(this.state.subs);
-
-        for (let i = 0; i < this.state.subs.length; i++) {
-            console.log(this.state.subs[i].popularity)
-        }
-
-        //Sort the subs and modify state after.
-        sort_subs(this.state.subs);
-
-        for (let i = 0; i < this.state.subs.length; i++) {
-            console.log(this.state.subs[i].popularity)
-        }
-
-        //Todo : view does not take change into account.
-        //this.setState({subs: new_subs})
-
     }
-
 
     async postsFetcher(url) {
         fetch(url)
             .then(res => res.json())
-            .then(
-                (result) => {
-
-                    //todo : do that after we have all the data?
-
-                    // const new_subs = [];
-                    // //Should return list of models.
-                    // for (const item of result.data.children){
-                    //     new_subs.push(SubModel.toSubModel(item))
-                    // }
-                    // return new_subs;
-                    return result
-
+            .then((result) => {
+                    return result;
                 },
                 // Error handler
                 (error) => {
-                    console.log("could not connect to : " + url);
-                    //TODO : error handling
+                    console.log("error : " + error);
+                    //todo : error handling
                     return null
                 }
             )
     }
-
-
 
     render() {
         return(
@@ -146,10 +90,14 @@ class App extends React.Component {
                 <div className="mainHeader">
                     Best website ever
                 </div>
-                <button type="button"  onClick={this.onClearsubs} />
+                <button type="button"  onClick={this.onClearsubs}>
+                    news
+                </button>
+                <button type="button"  onClick={this.onClearsubs}>
+                    Tech
+                </button>
                 <SubmissionList data={this.state.subs}/>
             </div>
-
         )
     }
 }
@@ -157,15 +105,17 @@ class App extends React.Component {
 /** Function to parse the url
  * mode : string -> should be enum
  * nb_subs : int
+ * return : full url as string
  * **/
 function parse_url(url, mode = "top", nb_subs = 10){
     // should be the format : "https://www.reddit.com/r/worldnews/top.json?limit=1";
     return url + mode + ".json?limit=" + nb_subs
 }
 
-/** Function to parse the response**/
-function parseResponse(result) {
-
+/** Function to parse the response
+ * return : list of models*
+ * **/
+function parseResponseToModel(result) {
     const subs_to_push = [];
 
     //Should return list of models.
@@ -181,7 +131,7 @@ function parseResponse(result) {
  * **/
 function calc_pop(subs) {
     subs.forEach(function(sub) {
-        sub.popularity = sub.score / sub.subreddit_subscribers
+        sub.popularity = 1000 * sub.score / sub.subreddit_subscribers
     });
 }
 
@@ -204,7 +154,7 @@ function sort_subs(subs) {
             }
         }
     }
-    subs.push(new SubModel("test","test", "test", "test", 3, 3))
+    return new_subs;
 }
 
 export default App;

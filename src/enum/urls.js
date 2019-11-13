@@ -4,3 +4,8 @@ export const reddit_news = {
     RWORLDNEWS: "https://www.reddit.com/r/worldnews/",
     RNEWS: "https://www.reddit.com/r/news/"
 };
+
+export const sections = {
+    NEWS: "news",
+    TECH: "technologies"
+};
