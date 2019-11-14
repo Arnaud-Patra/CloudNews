@@ -26,34 +26,45 @@ class App extends React.Component {
     };
 
     onNews = () => {
+        this.onClearsubs();
         this.setState({ section: sections.NEWS });
-        console.log(this.state.section);
+        console.log("section = " + this.state.section);
+        this.load_subs(sections.NEWS);
     };
 
     onTech = () => {
+        this.onClearsubs();
+
         this.setState({ section: sections.TECH });
+        console.log("section = " + this.state.section);
+
+        this.load_subs(sections.TECH);
     };
 
-    async componentDidMount() {
+    componentDidMount() {
+        this.load_subs();
+    }
 
+    load_subs(section = this.state.section) {
         let promises = [];
         /** fetch urls from reddit_news **/
-        Object.entries(this.state.section).map(async ([redditNewsKey, value]) => {
+        Object.entries(section).map(async ([redditNewsKey, value]) => {
 
             const url = parse_url(value, "top", 5);
 
-            console.log("fetching : " + url);
             const promise = fetch(url)
                 .then(res => res.json());
 
             promises.push(promise)
         });
 
+        console.log("fetching : " + this.state.section);
+
         /** precess list of promises **/
         Promise.all(promises)
             .then(responses => {
                 responses.map(response =>{
-                    process(response)
+                    this.process(response)
                 });
             })
             .then( () =>{
@@ -62,37 +73,21 @@ class App extends React.Component {
                 this.setState({subs: sorted_subs})
             })
             .catch(error => console.log(`Error in executing ${error}`));
-
-        /** Process one Promise **/
-        const process = (response) =>{
-            //Response to SubModel
-            let new_subs = parseResponseToModel(response);
-
-            //calc popularity todo : not use this.state.subs but local var
-            calc_pop(new_subs);
-
-            /** update state (concatenate)**/
-            this.setState((prevState) => ({
-                subs : [...prevState.subs.concat(new_subs)]
-            }));
-        };
-
     }
 
-    async postsFetcher(url) {
-        fetch(url)
-            .then(res => res.json())
-            .then((result) => {
-                    return result;
-                },
-                // Error handler
-                (error) => {
-                    console.log("error : " + error);
-                    //todo : error handling
-                    return null
-                }
-            )
-    }
+    process (response){
+        //Response to SubModel
+        let new_subs = parseResponseToModel(response);
+
+        //calc popularity todo : not use this.state.subs but local var
+        calc_pop(new_subs);
+
+        /** update state (concatenate)**/
+        this.setState((prevState) => ({
+            subs : [...prevState.subs.concat(new_subs)]
+        }));
+    };
+
 
     render() {
         return(
