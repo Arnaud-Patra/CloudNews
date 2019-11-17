@@ -42,13 +42,14 @@ class App extends React.Component {
     };
 
     componentDidMount() {
+        //Load the subs when the app opens.
         this.load_subs();
     }
 
     load_subs(section = this.state.section) {
         let promises = [];
         /** fetch urls from reddit_news **/
-        Object.entries(section).map(async ([redditNewsKey, value]) => {
+        Object.entries(section).map(([redditNewsKey, value]) => {
 
             const url = parse_url(value, "top", 5);
 
@@ -58,7 +59,7 @@ class App extends React.Component {
             promises.push(promise)
         });
 
-        console.log("fetching : " + this.state.section);
+        // console.log("fetching : " + this.state.section);
 
         /** precess list of promises **/
         Promise.all(promises)
@@ -70,7 +71,7 @@ class App extends React.Component {
             .then( () =>{
                 console.log("proceed to sort.");
                 const sorted_subs = sort_subs(this.state.subs);
-                this.setState({subs: sorted_subs})
+                this.setState({subs: sorted_subs});
             })
             .catch(error => console.log(`Error in executing ${error}`));
     }
@@ -126,9 +127,11 @@ function parseResponseToModel(result) {
     const subs_to_push = [];
 
     //Should return list of models.
-    for (const item of result.data.children){
-        subs_to_push.push(SubModel.toSubModel(item))
-    }
+    result.data.children.forEach( item => subs_to_push.push(SubModel.toSubModel(item)));
+
+    // for (const item of result.data.children){
+    //     subs_to_push.push(SubModel.toSubModel(item))
+    // }
     return subs_to_push
 }
 

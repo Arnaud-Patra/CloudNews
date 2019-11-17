@@ -51,3 +51,10 @@
 .pop{
     color: #282c34;
 }
+
+.sub_button_img{
+    width: 40px;
+    position: relative;
+    bottom: 20px;
+    right: 20px;
+}
