@@ -25,10 +25,7 @@ function SubmissionItem(props){
             <div className="pop">
                 {"pop = " + props.popularity}
             </div>
-
             <img className={"sub_button_img"} src="cloudicon.ico" alt="my image" onClick={() => { openInNewTab(props.url) }}/>
-
-
         </div>
 
     )

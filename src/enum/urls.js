@@ -7,6 +7,12 @@ export const reddit_news = {
     RNEWS: "https://www.reddit.com/r/news/"
 };
 
+export const newsapi_org = {
+    FRANCE: 'https://newsapi.org/v2/top-headlines?' +
+        'country=fr&' +
+        'apiKey=a2ad5ebfec7e4f7da1a7cb9b455d49ab'
+};
+
 export const reddit_tech = {
     COMPSCI: "https://www.reddit.com/r/compsci/",
     PROGRAMMING: "https://www.reddit.com/r/programming/",

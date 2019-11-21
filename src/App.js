@@ -68,7 +68,7 @@ class App extends React.Component {
                     this.process(response)
                 });
             })
-            .then( () =>{
+            .then( (r) =>{
                 console.log("proceed to sort.");
                 const sorted_subs = sort_subs(this.state.subs);
                 this.setState({subs: sorted_subs});
