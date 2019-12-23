@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import SubmissionList from './submissionItem/Submission'
 import SubModel from "./Models/submodel";
-import {reddit_news, sections} from "./enum/urls";
+import {cloudnewsserv, reddit_news, sections} from "./enum/urls";
 
 class App extends React.Component {
 
@@ -50,8 +50,12 @@ class App extends React.Component {
         let promises = [];
         /** fetch urls from reddit_news **/
         Object.entries(section).map(([redditNewsKey, value]) => {
-
-            const url = parse_url(value, "top", 5);
+            let url = "";
+            if (redditNewsKey === 'FRANCE'){
+                url = parse_url(value);
+            }else{
+                url = parse_reddit_url(value, "top", 5);
+            }
 
             const promise = fetch(url)
                 .then(res => res.json());
@@ -110,14 +114,27 @@ class App extends React.Component {
     }
 }
 
-/** Function to parse the url
+/** Function to parse the url for france api
+ * url :
  * mode : string -> should be enum
  * nb_subs : int
  * return : full url as string
  * **/
-function parse_url(url, mode = "top", nb_subs = 10){
+function parse_url(url){
+    // should be the format : "http://cloudnewsserv.appspot.com/get_reddit_news";
+    return cloudnewsserv + url
+}
+
+/** Function to parse the url from reddit
+ * url :
+ * mode : string -> should be enum
+ * nb_subs : int
+ * return : full url as string
+ * **/
+function parse_reddit_url(url, mode = "top", nb_subs = 10){
     // should be the format : "https://www.reddit.com/r/worldnews/top.json?limit=1";
-    return url + mode + ".json?limit=" + nb_subs
+    // return url + mode + ".json?limit=" + nb_subs
+    return cloudnewsserv + url
 }
 
 /** Function to parse the response
