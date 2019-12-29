@@ -8,6 +8,7 @@
 }
 
 .submissionItem {
+    position: relative;
     width: 700px;
     margin: 10px;
     padding: 10px 10px 10px 10px;
@@ -27,27 +28,43 @@
 
 .subreddit{
     font-weight: bold;
+    display: flex;
+    margin: 10px 10px 10px 100px;
+
 }
 .sub_title {
     font-family: Arial, sans-serif;
     font-weight: normal;
     font-size: 15px;
-    padding: 10px 0px 10px 0px;
+    display: flex;
+    padding: 10px 10px 10px 10px;
     color: #D7DADC;
 }
 
 .score{
-    position: relative;
-    padding: 10px 0px 10px 0px;
+    display: flex;
+    padding: 10px 10px 10px 10px;
     font-weight: bold;
     color: #dc8033;
 }
 
 .url{
+
+    display: flex;
+    padding: 10px 10px 10px 10px;
     color: #4FBCFF;
 }
 
 
 .pop{
+    display: flex;
+    padding: 10px 10px 10px 10px;
     color: #282c34;
+}
+
+.sub_button_img{
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

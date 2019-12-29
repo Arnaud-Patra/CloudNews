@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import SubmissionList from './submissionItem/Submission'
 import SubModel from "./Models/submodel";
-import {reddit_news, sections} from "./enum/urls";
+import {cloudnewsserv, reddit_news, sections} from "./enum/urls";
 
 class App extends React.Component {
 
@@ -16,7 +16,7 @@ class App extends React.Component {
 
         this.state = {
             subs: [],
-            section : sections.TECH
+            section : sections.FRANCE
         };
         //Setting subs as a array of SubModels would be nicer.
     }
@@ -42,37 +42,59 @@ class App extends React.Component {
     };
 
     componentDidMount() {
+        //Load the subs when the app opens.
         this.load_subs();
     }
 
     load_subs(section = this.state.section) {
         let promises = [];
         /** fetch urls from reddit_news **/
-        Object.entries(section).map(async ([redditNewsKey, value]) => {
+        // Object.entries(section).map(([redditNewsKey, value]) => {
+        //     let url = "";
+        //     console.log(section)
+        //     if (redditNewsKey === 'FRANCE'){
+        //         url = parse_url(section);
+        //     }else{
+        //         url = parse_reddit_url(section, "top", 5);
+        //     }
+        //
+        //     const promise = fetch(url, {mode: 'no-cors'})
+        //         .then(res => res.json());
+        //
+        //     promises.push(promise)
+        // });
 
-            const url = parse_url(value, "top", 5);
+        let url = "";
+        console.log(section);
+        if (section === '/get_france'){
+            url = parse_url(section);
+        }else{
+            url = parse_reddit_url(section, "top", 5);
+        }
 
-            const promise = fetch(url)
-                .then(res => res.json());
+            const promise = fetch(url, {mode: 'cors'})
+            .then(res => res.json());
 
-            promises.push(promise)
-        });
-
-        console.log("fetching : " + this.state.section);
+        //For now, only one promise at the time.
+        promises.push(promise);
 
         /** precess list of promises **/
         Promise.all(promises)
             .then(responses => {
+                console.log("responses : " + responses);
+
                 responses.map(response =>{
+                    console.log("response : " + response);
                     this.process(response)
                 });
             })
-            .then( () =>{
+            .then((r) =>{
                 console.log("proceed to sort.");
                 const sorted_subs = sort_subs(this.state.subs);
-                this.setState({subs: sorted_subs})
+                console.log(sorted_subs);
+                this.setState({subs: sorted_subs});
             })
-            .catch(error => console.log(`Error in executing ${error}`));
+            // .catch(error => console.log(`Error in executing ${error}`));
     }
 
     process (response){
@@ -109,14 +131,28 @@ class App extends React.Component {
     }
 }
 
-/** Function to parse the url
+/** Function to parse the url for france api
+ * url :
  * mode : string -> should be enum
  * nb_subs : int
  * return : full url as string
  * **/
-function parse_url(url, mode = "top", nb_subs = 10){
+function parse_url(url){
+    // should be the format : "http://cloudnewsserv.appspot.com/get_reddit_news";
+    return cloudnewsserv + url
+}
+
+/** Function to parse the url from reddit
+ * url :
+ * mode : string -> should be enum
+ * nb_subs : int
+ * return : full url as string
+ * **/
+function parse_reddit_url(url, mode = "top", nb_subs = 10){
     // should be the format : "https://www.reddit.com/r/worldnews/top.json?limit=1";
-    return url + mode + ".json?limit=" + nb_subs
+    // return url + mode + ".json?limit=" + nb_subs
+    console.log(cloudnewsserv + url)
+    return cloudnewsserv + url
 }
 
 /** Function to parse the response
@@ -126,9 +162,11 @@ function parseResponseToModel(result) {
     const subs_to_push = [];
 
     //Should return list of models.
-    for (const item of result.data.children){
-        subs_to_push.push(SubModel.toSubModel(item))
-    }
+    result.articles.forEach( article => subs_to_push.push(SubModel.toSubModel(article)));
+
+    // for (const item of result.data.children){
+    //     subs_to_push.push(SubModel.toSubModel(item))
+    // }
     return subs_to_push
 }
 
