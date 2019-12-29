@@ -16,7 +16,7 @@ class App extends React.Component {
 
         this.state = {
             subs: [],
-            section : sections.TECH
+            section : sections.FRANCE
         };
         //Setting subs as a array of SubModels would be nicer.
     }
@@ -49,35 +49,52 @@ class App extends React.Component {
     load_subs(section = this.state.section) {
         let promises = [];
         /** fetch urls from reddit_news **/
-        Object.entries(section).map(([redditNewsKey, value]) => {
-            let url = "";
-            if (redditNewsKey === 'FRANCE'){
-                url = parse_url(value);
-            }else{
-                url = parse_reddit_url(value, "top", 5);
-            }
+        // Object.entries(section).map(([redditNewsKey, value]) => {
+        //     let url = "";
+        //     console.log(section)
+        //     if (redditNewsKey === 'FRANCE'){
+        //         url = parse_url(section);
+        //     }else{
+        //         url = parse_reddit_url(section, "top", 5);
+        //     }
+        //
+        //     const promise = fetch(url, {mode: 'no-cors'})
+        //         .then(res => res.json());
+        //
+        //     promises.push(promise)
+        // });
 
-            const promise = fetch(url)
-                .then(res => res.json());
+        let url = "";
+        console.log(section);
+        if (section === '/get_france'){
+            url = parse_url(section);
+        }else{
+            url = parse_reddit_url(section, "top", 5);
+        }
 
-            promises.push(promise)
-        });
+            const promise = fetch(url, {mode: 'cors'})
+            .then(res => res.json());
 
-        // console.log("fetching : " + this.state.section);
+        //For now, only one promise at the time.
+        promises.push(promise);
 
         /** precess list of promises **/
         Promise.all(promises)
             .then(responses => {
+                console.log("responses : " + responses);
+
                 responses.map(response =>{
+                    console.log("response : " + response);
                     this.process(response)
                 });
             })
-            .then( (r) =>{
+            .then((r) =>{
                 console.log("proceed to sort.");
                 const sorted_subs = sort_subs(this.state.subs);
+                console.log(sorted_subs);
                 this.setState({subs: sorted_subs});
             })
-            .catch(error => console.log(`Error in executing ${error}`));
+            // .catch(error => console.log(`Error in executing ${error}`));
     }
 
     process (response){
@@ -134,6 +151,7 @@ function parse_url(url){
 function parse_reddit_url(url, mode = "top", nb_subs = 10){
     // should be the format : "https://www.reddit.com/r/worldnews/top.json?limit=1";
     // return url + mode + ".json?limit=" + nb_subs
+    console.log(cloudnewsserv + url)
     return cloudnewsserv + url
 }
 
@@ -144,7 +162,7 @@ function parseResponseToModel(result) {
     const subs_to_push = [];
 
     //Should return list of models.
-    result.data.children.forEach( item => subs_to_push.push(SubModel.toSubModel(item)));
+    result.articles.forEach( article => subs_to_push.push(SubModel.toSubModel(article)));
 
     // for (const item of result.data.children){
     //     subs_to_push.push(SubModel.toSubModel(item))

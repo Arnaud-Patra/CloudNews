@@ -15,7 +15,7 @@ class SubModel extends React.Component {
 
     /* Method to convert reddit object into local model*/
     static toSubModel(item) {
-        return new SubModel(item.data.url, item.data.subreddit, item.data.title, item.data.score, item.data.subreddit_subscribers);
+        return new SubModel(item.url, item.subreddit, item.title, item.score, item.subreddit_subscribers);
     }
 }
 
