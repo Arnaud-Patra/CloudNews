@@ -6,5 +6,5 @@ export const sections = {
     FRANCE: '/get_france'
 };
 
-// export const cloudnewsserv = "https://cloudnewsserv.appspot.com";
-export const cloudnewsserv = "http://127.0.0.1:8080"; //For tests
+export const cloudnewsserv = "https://cloudnewsserv.appspot.com";
+// export const cloudnewsserv = "http://127.0.0.1:8080"; //For tests
